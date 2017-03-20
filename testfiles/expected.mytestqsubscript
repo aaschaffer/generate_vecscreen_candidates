@@ -1,0 +1,6 @@
+chmod +x mytest0.csh
+qsub mytest0.csh
+chmod +x mytest1.csh
+qsub mytest1.csh
+chmod +x mytest2.csh
+qsub mytest2.csh
