@@ -160,6 +160,7 @@ if(! defined $output_fasta_candidate_file) { $reqopts_errmsg .= "ERROR, --output
 if(($reqopts_errmsg ne "") || (! $all_options_recognized) || ($GetOptions_H{"-h"})) {
   output_banner(*STDERR, $version, $releasedate, $synopsis, $date);
   opt_OutputHelp(*STDERR, $usage, \%opt_HH, \@opt_order_A, \%opt_group_desc_H);
+  if($GetOptions_H{"-h"})          { exit 0; } # -h, exit with 0 status
   if   ($reqopts_errmsg ne "")     { die $reqopts_errmsg; }
   elsif(! $all_options_recognized) { die "ERROR, unrecognized option;"; }
   else                             { exit 0; } # -h, exit with 0 status
