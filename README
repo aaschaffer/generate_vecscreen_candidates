@@ -36,7 +36,7 @@ positions of either end of the query
 A match is Strong if either: it is terminal with a raw score of at
 least 24 or it is internal with a raw score of at least 30.
 
-A match is Moderate if if either: it is terminal with a raw score in
+A match is Moderate if either: it is terminal with a raw score in
 the interval [19,23] or internal with a raw score in the interval
 [25,29].
 
@@ -60,7 +60,7 @@ it follows that a necessary condition for a sequence S to have a reportable vecs
 match with vector V, the two must have a local alignment of raw score at least 16.
 This is not a sufficient condition because if the alignment is
 internal in S, and the score is < 23, it will not be reported.
-Importantly the sufficient considtion does not depend on the database size
+Importantly the sufficient condition does not depend on the database size
 or the sequence lengths, and uses the default blastn scoring system.
 Therefore, one can find all sequences within a BLASTable database D
 that meet the necessary condition  by using V as a query to D.
@@ -75,7 +75,7 @@ condition with other vectors V2, V3,... having the same or overlapping alignment
 
 Using the reverse query technique and some filtering based on expert
 (NCBI colleagues Richard McVeigh and Ilene Karsch-Mizrachi) knowledge it
-is possible to reach a manageable size set of sequences that have a non-neglible
+is possible to reach a manageable size set of sequences that have a non-negligible
 probability of having true positive vecscreen matches. Such sequences
 outoutput by this pipeline are called "candidate sequences" or "candidates".
 
@@ -109,7 +109,7 @@ files is:
    DDBJ or EMBL) and shortens the identifiers.
 
 5. make_filter_script.pl
-   This script helps apply ENtrez filters to exclude sequences that meet any
+   This script helps apply Entrez filters to exclude sequences that meet any
    of a list of criteria specified as Entrez  queries (see examples below)
 
 6. filter_by_taxon.pl
