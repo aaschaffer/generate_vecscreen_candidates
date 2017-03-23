@@ -244,6 +244,11 @@ only the accession and version, not the GenBank identifier.
 
 3) Apply all the Entrez filters specified in the --filters_file argument
    to get a reduced list of accessions.
+   The full set of Entrez filters we are using is supplied as
+   testfiles/filter_list_combined.txt
+and for testing purposes we provide a subset of that is in
+   testfiles/input.filter_list.txt 
+
 
 4) Run the NCBI program srcchk to get taxonomy sources of all accessions surviving step 3.
 
