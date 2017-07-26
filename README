@@ -1,3 +1,11 @@
+generate_vecscreen_candidates
+Author: Alejandro Schaffer
+
+github: https://github.com/aaschaffer/generate_vecscreen_candidates.git
+Version: 0.02
+--------------------------
+README
+
 This file describes two scripts called 
 generate_run_blast_scripts.pl
 and
