@@ -23,7 +23,9 @@ to be contaminated or extrinsically have been analyzed previously.
 Outline of this file:
 
 BACKGROUND
-RELEVANT FILES
+REQUIREMENTS
+REQUIREMENTS AND RELEVANT FILES
+TESTING THAT YOUR LOCAL INSTALLATION IS WORKING
 USAGE AND OPTIONS
 METHODS
 OUTPUT
@@ -91,13 +93,51 @@ non-negligible probability of having true positive vecscreen
 matches. Such sequences outoutput by this pipeline are called
 "candidate sequences" or "candidates".
 
-******************
-**RELEVANT FILES**
-******************
+***********************************
+**REQUIREMENTS AND RELEVANT FILES**
+***********************************
 
-Several executable files are required for the process of generating
-candidates to work within the NCBI environment. The full list of files
-is:
+**THE generate_run_blast_scripts.pl AND filter_vecscreen_candidates.pl
+**SCRIPTS CAN ONLY BE RUN FROM THE DIRECTORY IN WHICH THEY
+**EXIST. ALSO, THE CURRENT DIRECTORY (".") MUST BE IN YOUR PATH
+
+Do not move the scripts out of this directory. 
+
+There are two programs that are *NOT* included in this distribution
+that are required to be in your execution path. Those are:
+
+1. blastn
+   Nucleotide BLAST
+
+   At NCBI, this is probably here:
+   /usr/bin/blastn
+
+   Make sure that it is in your execution PATH
+
+2. srcchk
+   Determines the taxonomy of input sequences, with respect the NCBI taxonomy tree.
+
+   At NCBI, this is probably here:
+   /netopt/ncbi_tools64/bin/srcchk
+
+   Make sure that it is in your execution PATH
+
+   To add a symlink to this program in your current directory, execute
+   this command:
+
+   > ln -s /netopt/ncbi_tools64/bin/srcchk .
+
+3. qsub
+   Submits blast jobs to the compute farm at the end of
+   'generate_run_blast_scripts.pl'.  If you're at NCBI, this should
+   just work. If not, then your 'qsub' commands may fail due to
+   specific syntax required for your system. If you have
+   problems/questions please email Alejandro Schaffer
+   (schaffer@ncbi.nlm.nih.gov).
+
+Additional executable files that are included in this distribution are
+required for the process of generating candidates to work within your
+environment. The full list of files is:
 
 1. generate_run_blast_scripts.pl
    This script takes as inputs a list of vectors and a BLASTable
@@ -110,7 +150,6 @@ is:
    filtering in a sequence of steps. As its last main step, this
    script generates a FASTA-formatted file of all sequences that
    survived filtering.
-
 
 3. extract_acc_from_blast_outputs.pl
    This script extracts the accessions of matching sequences from the
@@ -143,27 +182,39 @@ is:
    the directory using files in the testfiles subdirectory.
  
 10. vecscreen_candidate_generation.pm
-   This is a perl module of procedures shared by some of the .pl perl
-   programs listed above.
+    This is a perl module of procedures shared by some of the .pl perl
+    programs listed above.
 
-11. blastn
-   Nucleotide BLAST
+11. epn-options.pm
+    A perl used module authored by Eric Nawrocki to handle command line
+    options.
 
-   /usr/bin/blastn
+***************************************************
+**TESTING THAT YOUR LOCAL INSTALLATION IS WORKING**
+***************************************************
 
-12. srcchk
-   Determines the taxonomy of input sequences, with respect the NCBI taxonomy tree.
+The file 'run_script_tests.pl' included in this distribution should be
+used to make sure that your scripts and local installation is working
+as expected. To do this test, go into the directory in which you
+unpacked the distribution and do:
 
-   /netopt/ncbi_tools64/bin/srcchk
+> perl run_script_tests.pl
 
-   To add this directory to your path execute this command:
-   > ln -s /netopt/ncbi_tools64/bin/srcchk .
+The script will run tests of both generate_run_blast_scripts.pl and
+filter_vecscreen_candidates.pl, and compare the output with expected
+output. The final line of output should be:
 
-13. epn-options.pm
-   A perl used module authored by Eric Nawrocki to handle command line
-   options.
+SUCCESS: all output files were as expected.
 
-   /panfs/pan1.be-md.ncbi.nlm.nih.gov/dnaorg/2015.09/vector_screening/test9b/epn-options.pm
+If that is true, then you should be able to run the scripts
+successfully on your system. If this is not the case, please email
+Alejandro Schaffer (schaffer@ncbi.nlm.nih.gov)
+
+One aspect of the scripts that is *NOT* tested by run_script_tests.pl
+is that the 'qsub' command generated in generate_run_blast_scripts.pl
+will correctly submit to your compute farm. To test this aspect, you
+will actually have to run generate_run_blast_scripts.pl without using
+the --wait option.
 
 *********************
 **USAGE AND OPTIONS**
@@ -230,7 +281,6 @@ produced, while commands are being run.
 The option --keep determines whether the output file from running
 vecscreen within the script is kept (--keep on) or deleted (--keep
 off, default).
-
 
 ***********
 **METHODS**
