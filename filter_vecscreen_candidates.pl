@@ -129,7 +129,7 @@ my $usage       = "Usage: filter_vecscreen_candidates.pl ";
 my $total_seconds = -1 * seconds_since_epoch(); # by multiplying by -1, we can just add another seconds_since_epoch call at end to get total time
 my $executable    = $0;
 my $date          = scalar localtime();
-my $version       = "0.01";
+my $version       = "0.03";
 my $releasedate   = "Aug 2017";
 
 # set options in %opt_HH
