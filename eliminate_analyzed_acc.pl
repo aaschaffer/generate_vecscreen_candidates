@@ -53,9 +53,9 @@ my %opt_group_desc_H = ();
 #       option           type       default    group   requires incompat   preamble-outfile               help-outfile
 opt_Add("-h",              "boolean", 0,           0,    undef, undef,     undef,                         "display this help",                  \%opt_HH, \@opt_order_A);
 $opt_group_desc_H{"1"} = "required options";
-opt_Add("--input",         "string", undef,        1,    undef, undef,     "input accessions file",       "File name <s> with accessions to consider",    \%opt_HH, \@opt_order_A);
-opt_Add("--accessions",    "string", undef,        1,    undef, undef,     "input accessions to exclude", "File name <s> with accessions to exclude",     \%opt_HH, \@opt_order_A);
-opt_Add("--outfile",       "string", undef,        1,    undef, undef,     "output file",                 "File name <s> of output accessions",           \%opt_HH, \@opt_order_A);
+opt_Add("--input",         "string", undef,        1,    undef, undef,     "input accessions file",       "REQUIRED: file name <s> with accessions to consider",    \%opt_HH, \@opt_order_A);
+opt_Add("--accessions",    "string", undef,        1,    undef, undef,     "input accessions to exclude", "REQUIRED: file name <s> with accessions to exclude",     \%opt_HH, \@opt_order_A);
+opt_Add("--outfile",       "string", undef,        1,    undef, undef,     "output file",                 "REQUIRED: file name <s> of output accessions",           \%opt_HH, \@opt_order_A);
 
 # This section needs to be kept in sync (manually) with the opt_Add() section above
 my %GetOptions_H = ();

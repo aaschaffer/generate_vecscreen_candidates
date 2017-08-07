@@ -25,17 +25,17 @@ my $noutput = 4;
 my @exp_outputfile_A = ();
 my @outputfile_A = ();
 my @inputfile_A = ();
-push(@exp_outputfile_A, "testfiles/expected.mytest0.csh");
-push(@exp_outputfile_A, "testfiles/expected.mytest1.csh");
-push(@exp_outputfile_A, "testfiles/expected.mytest2.csh");
-push(@exp_outputfile_A, "testfiles/expected.mytestqsubscript");
+push(@exp_outputfile_A, "test-files/expected.mytest0.csh");
+push(@exp_outputfile_A, "test-files/expected.mytest1.csh");
+push(@exp_outputfile_A, "test-files/expected.mytest2.csh");
+push(@exp_outputfile_A, "test-files/expected.mytestqsubscript");
 
 push(@outputfile_A, "mytest0.csh");
 push(@outputfile_A, "mytest1.csh");
 push(@outputfile_A, "mytest2.csh");
 push(@outputfile_A, "mytestqsubscript");
 
-push(@inputfile_A, "testfiles/input.univec_list.txt");
+push(@inputfile_A, "test-files/input.univec_list.txt");
 
 # make sure required expected output files exist to compare against
 foreach my $req_file (@exp_outputfile_A) { 
@@ -52,11 +52,11 @@ foreach my $req_file (@inputfile_A) {
 
 # remove any output files that currently exist 
 foreach my $outputfile (@outputfile_A) { 
-  if(-e $outputfile) { run_command("rm $outputfile", 1); }
+  if(-e $outputfile) { run_command("rm $outputfile", 0); }
 }
 
 my $diff_output;
-my $cmd = "./generate_run_blast_scripts.pl --wait --input testfiles/input.univec_list.txt --outprefix mytest";
+my $cmd = "./generate_run_blast_scripts.pl --wait --input test-files/input.univec_list.txt --outprefix mytest > /dev/null";
 run_command($cmd, 1);
 for(my $i = 0; $i < $noutput; $i++) { 
   if(! -e $outputfile_A[$i]) { 
@@ -81,7 +81,7 @@ for(my $i = 0; $i < $noutput; $i++) {
 
 # clean up by removing output files we just created
 foreach my $outputfile (@outputfile_A) { 
-  if(-e $outputfile) { run_command("rm $outputfile", 1); }
+  if(-e $outputfile) { run_command("rm $outputfile", 0); }
 }
 
 ####################################################################
@@ -134,10 +134,10 @@ foreach my $req_file (@inputfile_A) {
 
 # remove any output files that currently exist 
 foreach my $outputfile (@outputfile_A) { 
-  if(-e $outputfile) { run_command("rm $outputfile", 1); }
+  if(-e $outputfile) { run_command("rm $outputfile", 0); }
 }
 
-$cmd = "./filter_vecscreen_candidates.pl --keep --input_match_files test-files/input.blast_list.txt --input_filters_file test-files/input.filter_list.txt --input_tax_exclusion_file test-files/input.excluded_taxa.txt --input_exclude_accessions test-files/input.excluded_accessions.txt --output mytest.fa";
+$cmd = "./filter_vecscreen_candidates.pl --keep --input_match_files test-files/input.blast_list.txt --input_filters_file test-files/input.filter_list.txt --input_tax_exclusion_file test-files/input.excluded_taxa.txt --input_exclude_accessions test-files/input.excluded_accessions.txt --output mytest.fa > /dev/null";
 run_command($cmd, 1);
 for(my $i = 0; $i < $noutput; $i++) { 
   if(! -e $outputfile_A[$i]) { 
@@ -153,7 +153,7 @@ for(my $i = 0; $i < $noutput; $i++) {
 
 # clean up by removing output files we just created
 foreach my $outputfile (@outputfile_A) { 
-  if(-e $outputfile) { run_command("rm $outputfile", 1); }
+  if(-e $outputfile) { run_command("rm $outputfile", 0); }
 }
 ###############################################################
 
@@ -167,7 +167,7 @@ printf("SUCCESS: all output files were as expected.\n");
 #              from generate_run_blast_scripts.pl. We can't just
 #              diff these files against each other because they include
 #              directory paths that are expected to differ between
-#              a local install and the testfiles included with the
+#              a local install and the test-files included with the
 #              program.
 #
 # Arguments:   
