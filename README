@@ -20,6 +20,13 @@ sufficiently strong match to the vector. Second, we can apply a series
 of filters to exclude sequences that either intrinsically are unlikely
 to be contaminated or extrinsically have been analyzed previously.
 
+There is a related archive
+https://github.com/aaschaffer/vecscreen_plus_taxonomy.git
+that provides code to evaluate whether vecscreen matches represent
+true positive contamination or not.
+
+
+
 Outline of this file:
 
 BACKGROUND
@@ -37,7 +44,12 @@ OUTPUT
 vecscreen is the established NCBI program to identify matches between
 (query) sequences and (subject) vectors in UniVec. These matches may
 represent (true) vector contamination, but experience has shown that
-there can be many false positives.
+there can be many false positives. The purpose of
+generate_vecscreen_candidates is to search a BLASTable nucleotide database,
+such as the nonredundant (nr) database of GenBank,
+to identify sequences that may be expected
+to have vecscreen matches, without having to run vecscreen on all
+sequences in the database.
 
 1) Location: Internal or Terminal
 A match is Terminal if and only if it includes a nucleotide within 25
@@ -92,6 +104,17 @@ it is possible to reach a manageable size set of sequences that have a
 non-negligible probability of having true positive vecscreen
 matches. Such sequences outoutput by this pipeline are called
 "candidate sequences" or "candidates".
+
+There is a related archive
+https://github.com/aaschaffer/vecscreen_plus_taxonomy.git
+that provides code to evaluate whether vecscreen matches represent
+true positive contamination or not.  vecscreen_plus_taxonomy is
+separate from generate_vecscreen_candidates because the more common
+expected usage of vecscreen_plus_taxonomy is in prospective analysis
+of new sequences. In prospective analysis, the new sequences are
+themselves the candidates to have vecscreen matches and hence, there
+is no need to search a database retrospectively for candidates.
+
 
 ***********************************
 **REQUIREMENTS AND RELEVANT FILES**
