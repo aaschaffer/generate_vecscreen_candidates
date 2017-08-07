@@ -98,13 +98,13 @@ $noutput = 7;
 @exp_outputfile_A = ();
 @outputfile_A = ();
 @inputfile_A = ();
-push(@exp_outputfile_A, "testfiles/expected.initial_candidate_matches.txt");
-push(@exp_outputfile_A, "testfiles/expected.initial_candidate_short_acc.txt");
-push(@exp_outputfile_A, "testfiles/expected.postEntrez_candidate_accessions.txt");
-push(@exp_outputfile_A, "testfiles/expected.taxonomy_info.txt");
-push(@exp_outputfile_A, "testfiles/expected.post_taxonomy_candidate_accessions.txt");
-push(@exp_outputfile_A, "testfiles/expected.post_all_filters_candidate_accessions.txt");
-push(@exp_outputfile_A, "testfiles/expected.mytest.fa");
+push(@exp_outputfile_A, "test-files/expected.initial_candidate_matches.txt");
+push(@exp_outputfile_A, "test-files/expected.initial_candidate_short_acc.txt");
+push(@exp_outputfile_A, "test-files/expected.postEntrez_candidate_accessions.txt");
+push(@exp_outputfile_A, "test-files/expected.taxonomy_info.txt");
+push(@exp_outputfile_A, "test-files/expected.post_taxonomy_candidate_accessions.txt");
+push(@exp_outputfile_A, "test-files/expected.post_all_filters_candidate_accessions.txt");
+push(@exp_outputfile_A, "test-files/expected.mytest.fa");
 
 push(@outputfile_A, "initial_candidate_matches.txt");
 push(@outputfile_A, "initial_candidate_short_acc.txt");
@@ -114,10 +114,10 @@ push(@outputfile_A, "post_taxonomy_candidate_accessions.txt");
 push(@outputfile_A, "post_all_filters_candidate_accessions.txt");
 push(@outputfile_A, "mytest.fa");
 
-push(@inputfile_A, "testfiles/input.blast_list.txt");
-push(@inputfile_A, "testfiles/input.filter_list.txt");
-push(@inputfile_A, "testfiles/input.excluded_taxa.txt");
-push(@inputfile_A, "testfiles/input.excluded_accessions.txt");
+push(@inputfile_A, "test-files/input.blast_list.txt");
+push(@inputfile_A, "test-files/input.filter_list.txt");
+push(@inputfile_A, "test-files/input.excluded_taxa.txt");
+push(@inputfile_A, "test-files/input.excluded_accessions.txt");
 
 # make sure required expected output files exist to compare against
 foreach my $req_file (@exp_outputfile_A) { 
@@ -137,7 +137,7 @@ foreach my $outputfile (@outputfile_A) {
   if(-e $outputfile) { run_command("rm $outputfile", 1); }
 }
 
-$cmd = "./filter_vecscreen_candidates.pl --keep --input_match_files testfiles/input.blast_list.txt --input_filters_file testfiles/input.filter_list.txt --input_tax_exclusion_file testfiles/input.excluded_taxa.txt --input_exclude_accessions testfiles/input.excluded_accessions.txt --output mytest.fa";
+$cmd = "./filter_vecscreen_candidates.pl --keep --input_match_files test-files/input.blast_list.txt --input_filters_file test-files/input.filter_list.txt --input_tax_exclusion_file test-files/input.excluded_taxa.txt --input_exclude_accessions test-files/input.excluded_accessions.txt --output mytest.fa";
 run_command($cmd, 1);
 for(my $i = 0; $i < $noutput; $i++) { 
   if(! -e $outputfile_A[$i]) { 
