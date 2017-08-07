@@ -129,8 +129,8 @@ my $usage       = "Usage: filter_vecscreen_candidates.pl ";
 my $total_seconds = -1 * seconds_since_epoch(); # by multiplying by -1, we can just add another seconds_since_epoch call at end to get total time
 my $executable    = $0;
 my $date          = scalar localtime();
-my $version       = "0.01";
-my $releasedate   = "Jan 2017";
+my $version       = "0.03";
+my $releasedate   = "Aug 2017";
 
 # set options in %opt_HH
 opt_SetFromUserHash(\%GetOptions_H, \%opt_HH);
@@ -158,8 +158,8 @@ if(! defined $input_tax_exclusion_file)    { $reqopts_errmsg .= "ERROR, --input_
 if(! defined $output_fasta_candidate_file) { $reqopts_errmsg .= "ERROR, --output option not used. It is required.\n"; }
 
 if(($reqopts_errmsg ne "") || (! $all_options_recognized) || ($GetOptions_H{"-h"})) {
-  output_banner(*STDERR, $version, $releasedate, $synopsis, $date);
-  opt_OutputHelp(*STDERR, $usage, \%opt_HH, \@opt_order_A, \%opt_group_desc_H);
+  output_banner(*STDOUT, $version, $releasedate, $synopsis, $date);
+  opt_OutputHelp(*STDOUT, $usage, \%opt_HH, \@opt_order_A, \%opt_group_desc_H);
   if($GetOptions_H{"-h"})          { exit 0; } # -h, exit with 0 status
   if   ($reqopts_errmsg ne "")     { die $reqopts_errmsg; }
   elsif(! $all_options_recognized) { die "ERROR, unrecognized option;"; }
@@ -170,7 +170,7 @@ if(($reqopts_errmsg ne "") || (! $all_options_recognized) || ($GetOptions_H{"-h"
 my @arg_desc_A = (); # necessary to pass into opt_OutputPreamble()
 my @arg_A      = (); # necessary to pass into opt_OutputPreamble()
 output_banner(*STDOUT, $version, $releasedate, $synopsis, $date);
-opt_OutputPreamble(*STDERR, \@arg_desc_A, \@arg_A, \%opt_HH, \@opt_order_A);
+opt_OutputPreamble(*STDOUT, \@arg_desc_A, \@arg_A, \%opt_HH, \@opt_order_A);
 
 # Finished processing/checking command line options
 ####################################################
@@ -179,49 +179,49 @@ opt_OutputPreamble(*STDERR, \@arg_desc_A, \@arg_A, \%opt_HH, \@opt_order_A);
 # Step 1. Call extract_accessions_from_blast_outputs #
 ######################################################
 my $progress_w = 50; # the width of the left hand column in our progress output, hard-coded
-my $start_secs = output_progress_prior("Running extract_accessions_from_blast_ouptuts ", $progress_w, undef, *STDERR);
+my $start_secs = output_progress_prior("Running extract_accessions_from_blast_ouptuts ", $progress_w, undef, *STDOUT);
 run_command("$extract_accessions_from_blast_outputs --input $input_matches_file > $temp_initial_matches_file", $be_verbose); 
 my $desc_str = sprintf("output saved as $temp_initial_matches_file%s", opt_Get("--keep", \%opt_HH) ? "" : " (temporarily)");
-output_progress_complete($start_secs, $desc_str, undef, *STDERR);
+output_progress_complete($start_secs, $desc_str, undef, *STDOUT);
 
 ######################################################
 # Step 2. Select GenBank accessions and shorten them #
 ######################################################
-$start_secs = output_progress_prior("Selecting and shortening GenBank accessions", $progress_w, undef, *STDERR);
+$start_secs = output_progress_prior("Selecting and shortening GenBank accessions", $progress_w, undef, *STDOUT);
 run_command("$select_shorten_accessions --input $temp_initial_matches_file > $temp_initial_accessions_file", $be_verbose);
 $desc_str = sprintf("output saved as $temp_initial_accessions_file%s", opt_Get("--keep", \%opt_HH) ? "" : " (temporarily)");
-output_progress_complete($start_secs, $desc_str, undef, *STDERR);
+output_progress_complete($start_secs, $desc_str, undef, *STDOUT);
 
 ##########################################################
 # Step 3. Apply Entrez filters to initial accession list #
 ##########################################################
-$start_secs = output_progress_prior("Applying Entrez filters", $progress_w, undef, *STDERR);
+$start_secs = output_progress_prior("Applying Entrez filters", $progress_w, undef, *STDOUT);
 run_command("$make_filter_script --instructions $input_filters_file  --outfile $temp_Entrez_filter_script", $be_verbose);
 run_command("chmod +x $temp_Entrez_filter_script", 0); # 0: don't echo command to STDOUT
 run_command("$temp_Entrez_filter_script $temp_initial_accessions_file > $temp_postEntrez_matches_file", $be_verbose);
 $desc_str = sprintf("output saved as $temp_postEntrez_matches_file%s", opt_Get("--keep", \%opt_HH) ? "" : " (temporarily)");
-output_progress_complete($start_secs, $desc_str, undef, *STDERR);
+output_progress_complete($start_secs, $desc_str, undef, *STDOUT);
 
 ##############################################################
 # Step 4. Run srcchk to get taxonomy of remaining accessions #
 ##############################################################
-$start_secs = output_progress_prior("Running srcchk to get taxonomy information", $progress_w, undef, *STDERR);
+$start_secs = output_progress_prior("Running srcchk to get taxonomy information", $progress_w, undef, *STDOUT);
 run_command("$srcchk -i $temp_postEntrez_matches_file -f TaxID  -o $temp_srcchk_output_file", $be_verbose);
 $desc_str = sprintf("output saved as $temp_srcchk_output_file%s", opt_Get("--keep", \%opt_HH) ? "" : " (temporarily)");
-output_progress_complete($start_secs, $desc_str, undef, *STDERR);
+output_progress_complete($start_secs, $desc_str, undef, *STDOUT);
 
 #########################################################
 # Step 5. Apply taxonomy filter to remaining accessions #
 #########################################################
-$start_secs = output_progress_prior("Applying taxonomy filter", $progress_w, undef, *STDERR);
+$start_secs = output_progress_prior("Applying taxonomy filter", $progress_w, undef, *STDOUT);
 run_command("$filter_by_taxon --input $temp_srcchk_output_file --exclude $input_tax_exclusion_file --outfile $temp_post_taxonomy_matches_file", $be_verbose);
 $desc_str = sprintf("output saved as $temp_post_taxonomy_matches_file%s", opt_Get("--keep", \%opt_HH) ? "" : " (temporarily)");
-output_progress_complete($start_secs, $desc_str, undef, *STDERR);
+output_progress_complete($start_secs, $desc_str, undef, *STDOUT);
 
 #########################################################
 # Step 6. [OPTIONAL] Remove accessions already analyzed #
 #########################################################
-$start_secs = output_progress_prior("Filtering out accessions already analyzed", $progress_w, undef, *STDERR);
+$start_secs = output_progress_prior("Filtering out accessions already analyzed", $progress_w, undef, *STDOUT);
 if (defined ($input_exclusion_acc_file)) {
     run_command("$eliminate_analyzed_acc --input $temp_post_taxonomy_matches_file --accessions $input_exclusion_acc_file --outfile $temp_post_all_filters_matches_file", $be_verbose);
 }
@@ -229,21 +229,21 @@ else {
     run_command("cp $temp_post_taxonomy_matches_file $temp_post_all_filters_matches_file", $be_verbose);
 }
 $desc_str = "output saved as $temp_post_all_filters_matches_file";
-output_progress_complete($start_secs, $desc_str, undef, *STDERR);
+output_progress_complete($start_secs, $desc_str, undef, *STDOUT);
 
 ####################################################################
 # Step 7. Produce FASTA file of sequences for remaining accessions #
 ####################################################################
-$start_secs = output_progress_prior("Producing FASTA file", $progress_w, undef, *STDERR);
+$start_secs = output_progress_prior("Producing FASTA file", $progress_w, undef, *STDOUT);
 run_command("$get_fasta $temp_post_all_filters_matches_file $output_fasta_candidate_file", $be_verbose);
 $desc_str = "output saved as $output_fasta_candidate_file";
-output_progress_complete($start_secs, $desc_str, undef, *STDERR);
+output_progress_complete($start_secs, $desc_str, undef, *STDOUT);
 
 ####################
 # Step 8. Clean up #
 ####################
 if (!$keep_temp_files) {
-    $start_secs = output_progress_prior("Cleaning up temporary intermediate output files", $progress_w, undef, *STDERR);
+    $start_secs = output_progress_prior("Cleaning up temporary intermediate output files", $progress_w, undef, *STDOUT);
     run_command("rm -f $temp_initial_matches_file",          $be_verbose); 
     run_command("rm -f $temp_initial_accessions_file",       $be_verbose); 
     run_command("rm -f $temp_Entrez_filter_script",          $be_verbose); 
@@ -252,7 +252,7 @@ if (!$keep_temp_files) {
     run_command("rm -f $temp_post_taxonomy_matches_file",    $be_verbose); 
     run_command("rm -f $temp_post_all_filters_matches_file", $be_verbose); 
     $desc_str = "deleted intermediated output files";
-    output_progress_complete($start_secs, $desc_str, undef, *STDERR);
+    output_progress_complete($start_secs, $desc_str, undef, *STDOUT);
 }
 
 #############################

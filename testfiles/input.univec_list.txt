@@ -1,3 +1,0 @@
-testfiles/A08585.1:1-86.na
-testfiles/A13775.1:1-42.na
-testfiles/A13776.1:1-42.na

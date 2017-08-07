@@ -1,3 +1,0 @@
-testfiles/expected.mytest.results0.out
-testfiles/expected.mytest.results1.out
-testfiles/expected.mytest.results2.out

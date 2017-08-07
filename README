@@ -1,8 +1,10 @@
 generate_vecscreen_candidates
 Author: Alejandro Schaffer
+Documentation help and code review: Eric Nawrocki 
 
 github: https://github.com/aaschaffer/generate_vecscreen_candidates.git
-Version: 0.02
+Version: 0.03
+August 2017
 --------------------------
 README
 
@@ -11,19 +13,19 @@ generate_run_blast_scripts.pl
 and
 filter_vecscreen_candidates.pl
 
-whose combined purpose is to identify plausible
-candidate sequences that may have vector contamination.
-The general idea is that given a vector, we can first
-identify any sequence in a database that has a sufficiently
-strong match to the vector. Second, we can apply a series
-of filters to exclude sequences that  either intrinsically
-are unlikely to be contaminated or extrinsically
-have been analyzed previously.
+whose combined purpose is to identify plausible candidate sequences
+that may have vector contamination.  The general idea is that given a
+vector, we can first identify any sequence in a database that has a
+sufficiently strong match to the vector. Second, we can apply a series
+of filters to exclude sequences that either intrinsically are unlikely
+to be contaminated or extrinsically have been analyzed previously.
 
 Outline of this file:
 
 BACKGROUND
-RELEVANT FILES
+REQUIREMENTS
+REQUIREMENTS AND RELEVANT FILES
+TESTING THAT YOUR LOCAL INSTALLATION IS WORKING
 USAGE AND OPTIONS
 METHODS
 OUTPUT
@@ -31,10 +33,11 @@ OUTPUT
 **************
 **BACKGROUND**
 **************
+
 vecscreen is the established NCBI program to identify matches between
 (query) sequences and (subject) vectors in UniVec. These matches may
-represent (true) vector contamination, but experience has shown that there
-can be many false positives.
+represent (true) vector contamination, but experience has shown that
+there can be many false positives.
 
 1) Location: Internal or Terminal
 A match is Terminal if and only if it includes a nucleotide within 25
@@ -62,103 +65,156 @@ https://www.ncbi.nlm.nih.gov/tools/vecscreen/about/
 In this document 'vecscreen' refers to the command-line version, not the
 Web page version.
 
-At the stage of making alignments, vecscreen uses the same alignment algorithm
-as blastn. From this algorithmic information and the definition of a Weak match,
-it follows that a necessary condition for a sequence S to have a reportable vecscreen
-match with vector V, the two must have a local alignment of raw score at least 16.
-This is not a sufficient condition because if the alignment is
-internal in S, and the score is < 23, it will not be reported.
-Importantly the sufficient condition does not depend on the database size
-or the sequence lengths, and uses the default blastn scoring system.
+At the stage of making alignments, vecscreen uses the same alignment
+algorithm as blastn. From this algorithmic information and the
+definition of a Weak match, it follows that a necessary condition for
+a sequence S to have a reportable vecscreen match with vector V, the
+two must have a local alignment of raw score at least 16.  This is not
+a sufficient condition because if the alignment is internal in S, and
+the score is < 23, it will not be reported.  Importantly the
+sufficient condition does not depend on the database size or the
+sequence lengths, and uses the default blastn scoring system.
 Therefore, one can find all sequences within a BLASTable database D
-that meet the necessary condition  by using V as a query to D.
+that meet the necessary condition by using V as a query to D.
 
-Testing with nucleotide non-redundant database (called here nr, also known as nt)
-shows that even though the condition is not sufficient,
-far fewer than 1% of all sequences in nr satisfy the necessary condition
-for any vector V among the over 5000 vectors in UniVec.
-Because vectors share segements, it is often the case that if S satisfies
-the alignment condition with one vector V1, it will also satisfy the
-condition with other vectors V2, V3,... having the same or overlapping alignments.
+Testing with nucleotide non-redundant database (called here nr, also
+known as nt) shows that even though the condition is not sufficient,
+far fewer than 1% of all sequences in nr satisfy the necessary
+condition for any vector V among the over 5000 vectors in UniVec.
+Because vectors share segements, it is often the case that if S
+satisfies the alignment condition with one vector V1, it will also
+satisfy the condition with other vectors V2, V3,... having the same or
+overlapping alignments.
 
 Using the reverse query technique and some filtering based on expert
-(NCBI colleagues Richard McVeigh and Ilene Karsch-Mizrachi) knowledge it
-is possible to reach a manageable size set of sequences that have a non-negligible
-probability of having true positive vecscreen matches. Such sequences
-outoutput by this pipeline are called "candidate sequences" or "candidates".
+(NCBI colleagues Richard McVeigh and Ilene Karsch-Mizrachi) knowledge
+it is possible to reach a manageable size set of sequences that have a
+non-negligible probability of having true positive vecscreen
+matches. Such sequences outoutput by this pipeline are called
+"candidate sequences" or "candidates".
 
-******************
-**RELEVANT FILES**
-******************
+***********************************
+**REQUIREMENTS AND RELEVANT FILES**
+***********************************
 
-Several executable files are required for the process of generating
-candidates to work within the NCBI environment. The full list of
-files is:
+**THE generate_run_blast_scripts.pl AND filter_vecscreen_candidates.pl
+**SCRIPTS CAN ONLY BE RUN FROM THE DIRECTORY IN WHICH THEY
+**EXIST. ALSO, THE CURRENT DIRECTORY (".") MUST BE IN YOUR PATH
+
+Do not move the scripts out of this directory. 
+
+There are two programs that are *NOT* included in this distribution
+that are required to be in your execution path. Those are:
+
+1. blastn
+   Nucleotide BLAST
+
+   At NCBI, this is probably here:
+   /usr/bin/blastn
+
+   Make sure that it is in your execution PATH
+
+2. srcchk
+   Determines the taxonomy of input sequences, with respect the NCBI taxonomy tree.
+
+   At NCBI, this is probably here:
+   /netopt/ncbi_tools64/bin/srcchk
+
+   Make sure that it is in your execution PATH
+
+   To add a symlink to this program in your current directory, execute
+   this command:
+
+   > ln -s /netopt/ncbi_tools64/bin/srcchk .
+
+3. qsub
+   Submits blast jobs to the compute farm at the end of
+   'generate_run_blast_scripts.pl'.  If you're at NCBI, this should
+   just work. If not, then your 'qsub' commands may fail due to
+   specific syntax required for your system. If you have
+   problems/questions please email Alejandro Schaffer
+   (schaffer@ncbi.nlm.nih.gov).
+
+Additional executable files that are included in this distribution are
+required for the process of generating candidates to work within your
+environment. The full list of files is:
 
 1. generate_run_blast_scripts.pl
-   This script takes as inputs a list of vectors and a BLASTable database.
-   It prepares scripts to run blastn with each vector as a query and
-   submits those scripts to the SGE compute farm.
+   This script takes as inputs a list of vectors and a BLASTable
+   database.  It prepares scripts to run blastn with each vector as a
+   query and submits those scripts to the SGE compute farm.
 
 2. filter_vecscreen_candidates.pl
    This script collects the matching sequences found by
-   generate_run_blast_scripts.pl
-   and reduces them to a shorter list by filtering in a sequence of
-   steps. As its last main step, this script generates a FASTA-formatted
-   file of all sequences that survived filtering. 
-
+   generate_run_blast_scripts.pl and reduces them to a shorter list by
+   filtering in a sequence of steps. As its last main step, this
+   script generates a FASTA-formatted file of all sequences that
+   survived filtering.
 
 3. extract_acc_from_blast_outputs.pl
-   This script extracts the accessions of matching sequences from the outputs of
-   generate_run_blast_scripts.pl
+   This script extracts the accessions of matching sequences from the
+   outputs of generate_run_blast_scripts.pl
 
 4. select_shorten_accessions.pl
-   This script selects the accessions that come from GenBank (as opposed to
-   DDBJ or EMBL) and shortens the identifiers.
+   This script selects the accessions that come from GenBank (as
+   opposed to DDBJ or EMBL) and shortens the identifiers.
 
 5. make_filter_script.pl
-   This script helps apply Entrez filters to exclude sequences that meet any
-   of a list of criteria specified as Entrez  queries (see examples below)
+   This script helps apply Entrez filters to exclude sequences that
+   meet any of a list of criteria specified as Entrez queries (see
+   examples below)
 
 6. filter_by_taxon.pl
-   This script filters out sequences originating from any of a list
-   of pre-specified taxids from NCBI's taxonomy.
+   This script filters out sequences originating from any of a list of
+   pre-specified taxids from NCBI's taxonomy.
 
 7. eliminate_analyzed_acc.pl
    This script eliminates accessions that of sequences that were previously analyzed
    (list supplied by the user), to avoid duplication of effort.
 
 8. get_fasta_from_acc.sh
-   This script takes a lists of accessions as its first argument
-   and retrieves the FASTA for those accessions into the file given by the second argument.
+   This script takes a lists of accessions as its first argument and
+   retrieves the FASTA for those accessions into the file given by the
+   second argument.
 
 9. run_script_tests.pl
-   This program takes zero arguments and tests the other programs in the directory using files
-   in the testfiles subdirectory.
+   This program takes zero arguments and tests the other programs in
+   the directory using files in the testfiles subdirectory.
  
 10. vecscreen_candidate_generation.pm
-   This is a perl module of procedures shared by some of the .pl perl programs
-   listed above.
+    This is a perl module of procedures shared by some of the .pl perl
+    programs listed above.
 
+11. epn-options.pm
+    A perl used module authored by Eric Nawrocki to handle command line
+    options.
 
-11. blastn
-   Nucleotide BLAST
+***************************************************
+**TESTING THAT YOUR LOCAL INSTALLATION IS WORKING**
+***************************************************
 
-   /usr/bin/blastn
+The file 'run_script_tests.pl' included in this distribution should be
+used to make sure that your scripts and local installation is working
+as expected. To do this test, go into the directory in which you
+unpacked the distribution and do:
 
-12. srcchk
-   Determines the taxonomy of input sequences, with respect the NCBI taxonomy tree.
+> perl run_script_tests.pl
 
-   /netopt/ncbi_tools64/bin/srcchk
+The script will run tests of both generate_run_blast_scripts.pl and
+filter_vecscreen_candidates.pl, and compare the output with expected
+output. The final line of output should be:
 
-   To add this directory to your path execute this command:
-   > ln -s /netopt/ncbi_tools64/bin/srcchk .
+SUCCESS: all output files were as expected.
 
-13. epn-options.pm
-   A perl used module authored by Eric Nawrocki to handle command
-   line options.
+If that is true, then you should be able to run the scripts
+successfully on your system. If this is not the case, please email
+Alejandro Schaffer (schaffer@ncbi.nlm.nih.gov)
 
-   /panfs/pan1.be-md.ncbi.nlm.nih.gov/dnaorg/2015.09/vector_screening/test9b/epn-options.pm
+One aspect of the scripts that is *NOT* tested by run_script_tests.pl
+is that the 'qsub' command generated in generate_run_blast_scripts.pl
+will correctly submit to your compute farm. To test this aspect, you
+will actually have to run generate_run_blast_scripts.pl without using
+the --wait option.
 
 *********************
 **USAGE AND OPTIONS**
@@ -172,8 +228,8 @@ The options that can be provided to generate_run_blast_scripts.pl are:
   --verbose : verbose mode: output commands as they are executed
   --wait    : do not submit jobs, just create qsub script and exit
 
-The first two options are required. The other three options are not required.
-By default --verbose and --wait are off.
+The first two options are required. The other three options are not
+required.  By default --verbose and --wait are off.
 
 --input is used to specify the vectors; there should be one vector per FASTA
   file in the list; the order in which the vectors are listed is unimportant; there is currently
@@ -193,10 +249,11 @@ Natural values for --outprefix are
    blastresults
    blastmatches
 
-One should use a unique prefix for those output files, so that
-they can be easily collected by an ls command later.
+One should use a unique prefix for those output files, so that they
+can be easily collected by an ls command later.
 
-The options that can be provided to filter_vecscreen_candidates.pl are in two sets:
+The options that can be provided to filter_vecscreen_candidates.pl are
+in two sets:
 
 basic options (required):
   --input_match_files <s>        : File name <s> with list of files that contain BLAST matches between vectors and a database
@@ -215,86 +272,87 @@ NOT "gbdiv syn" [PROP]
 NOT "transposon" [TITL]
 NOT (retroviridae[ORGN] AND ("LTR"[TITL] OR "long terminal repeat"[TITL]))
 
-The taxids in --input_tax_exclusion_file are integer taxids from NCBI's taxonomy,
-one per row.
+The taxids in --input_tax_exclusion_file are integer taxids from
+NCBI's taxonomy, one per row.
 
-The option --verbose determines how much diagnostic output is produced, while
-commands are being run.
+The option --verbose determines how much diagnostic output is
+produced, while commands are being run.
 
-The option --keep determines whether the output file from
-running vecscreen within the script is kept (--keep on) or
-deleted (--keep off, default).
-
+The option --keep determines whether the output file from running
+vecscreen within the script is kept (--keep on) or deleted (--keep
+off, default).
 
 ***********
 **METHODS**
 ***********
-
-generate_run_blast_scripts.pl finds all sequences in the specified db (-db) that
-may have a reportable vecscreen match, by characteristics of an alignment alone.
+generate_run_blast_scripts.pl finds all sequences in the specified db
+(-db) that may have a reportable vecscreen match, by characteristics
+of an alignment alone.
 
 The names of the output files from generate_run_blast_scripts.pl
 should be collected into a single file, by a UNIX command such as
 
 ls blast_results*.out > blast_results_files.txt
 
-The file of names, such as blast_results_files.txt is then used as the 
+The file of names, such as blast_results_files.txt is then used as the
 value of the argument
   --input_match_files
-to  filter_vecscreen_candidates.pl
+to filter_vecscreen_candidates.pl
 
-The script filter_vecscreen_candidates.pl carries out the following main steps:
+The script filter_vecscreen_candidates.pl carries out the following
+main steps:
 
-1) Extract the accession of the candidate sequences from all the results files.
+1) Extract the accession of the candidate sequences from all the
+   results files.
 
-2) Select those accessions that are from GenBank (not EMBL or DDBJ) and keep
-only the accession and version, not the GenBank identifier.
+2) Select those accessions that are from GenBank (not EMBL or DDBJ)
+   and keep only the accession and version, not the GenBank
+   identifier.
 
-3) Apply all the Entrez filters specified in the --filters_file argument
-   to get a reduced list of accessions.
-   The full set of Entrez filters we are using is supplied as
-   testfiles/filter_list_combined.txt
-and for testing purposes we provide a subset of that is in
-   testfiles/input.filter_list.txt 
+3) Apply all the Entrez filters specified in the --filters_file
+   argument to get a reduced list of accessions.  The full set of
+   Entrez filters we are using is supplied as
+   testfiles/filter_list_combined.txt and for testing purposes we
+   provide a subset of that is in testfiles/input.filter_list.txt
 
+4) Run the NCBI program srcchk to get taxonomy sources of all
+   accessions surviving step 3.
 
-4) Run the NCBI program srcchk to get taxonomy sources of all accessions surviving step 3.
+5) Filter out any accessions coming from taxids excluded by the
+   --input_tax_exclusion_file argument.
 
-5) Filter out any accessions coming from taxids excluded by the --input_tax_exclusion_file
-   argument.
+6) (Optional) If the argument --input_exclude_accessions is used, then
+   exclude the accessions in that file. The purpose of this step is to
+   avoid reanalyzing accessions that were already judged to be false
+   positives.
 
-6) (Optional) If the argument --input_exclude_accessions is used, then exclude the
-   accessions in that file. The purpose of this step is to avoid
-   reanalyzing accessions that were already judged to be false positives.
-
-7) Generate the FASTA file of all sequences whose accessions survive to
-   be the input of this step.
-
-
-
+7) Generate the FASTA file of all sequences whose accessions survive
+   to be the input of this step.
 
 **********
 **OUTPUT**
 **********
 
-generate_run_blast_scripts.pl produces N output files, if there are N vector queries;
-each output file is in blastn format type 6 with the following columns:
+generate_run_blast_scripts.pl produces N output files, if there are N
+vector queries; each output file is in blastn format type 6 with the
+following columns:
 
-Column 1: Vector query accession
-Column 2: Matching sequence identifier including GenBank indetifier (this is the candidate sequence that may be contaminated)
-Column 3: Percent identity of the alignment
-Column 4: Length of the alignment
-Columns 5,6: Mismatches and gaps
-Columns 7,8: Start and end positions in the vector query
+Column  1:    Vector query accession
+Column  2:    Matching sequence identifier including GenBank 
+              identifier (this is the candidate sequence that may be
+              contaminated)
+Column  3:    Percent identity of the alignment
+Column  4:    Length of the alignment
+Columns 5,6:  Mismatches and gaps
+Columns 7,8:  Start and end positions in the vector query
 Columns 9,10: Start and end positions in the candidate sequence
-Column 11: E-value
-Column 12: Bitscore
+Column  11:   E-value
+Column  12:   Bitscore
 
-
-filter_vecscreen_candidates.pl produces one FASTA file containing all the
-sequences identified as candidates to be contaminated.
-This is the expected format for the next pipeline
-from_vecscreen_to_summary.pl
+filter_vecscreen_candidates.pl produces one FASTA file containing all
+the sequences identified as candidates to be contaminated. This is
+the expected format for the next pipeline from_vecscreen_to_summary.pl
+(see https://github.com/aaschaffer/vecscreen_plus_taxonomy)
 
 *******************************************
 Send any comments or questions to Alejandro Schaffer
