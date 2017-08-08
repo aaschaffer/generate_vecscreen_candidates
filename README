@@ -103,7 +103,7 @@ matches. Such sequences outoutput by this pipeline are called
 
 Do not move the scripts out of this directory. 
 
-There are two programs that are *NOT* included in this distribution
+There are three programs that are *NOT* included in this distribution
 that are required to be in your execution path. Those are:
 
 1. blastn
@@ -113,6 +113,12 @@ that are required to be in your execution path. Those are:
    /usr/bin/blastn
 
    Make sure that it is in your execution PATH
+
+   Further, you will also need the nonredundant blast database ('nr')
+   on your system and in a directory contained in your BLASTDB
+   environment variable. Alternatively, you can use a different blast
+   database but if you do that you'll need to specify it's name to
+   'generate_run_blast_scripts.pl' as <s> using the '-db <s>' option.
 
 2. srcchk
    Determines the taxonomy of input sequences, with respect the NCBI taxonomy tree.
